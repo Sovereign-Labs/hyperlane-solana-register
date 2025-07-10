@@ -1,0 +1,10 @@
+{
+  "mainnet": {
+    "chainId": 1,
+    "programId": "1"
+  },
+  "testnet": {
+    "chainId": 2,
+    "programId": "2"
+  }
+}
