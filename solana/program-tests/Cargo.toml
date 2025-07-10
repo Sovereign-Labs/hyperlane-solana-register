@@ -1,5 +1,5 @@
 [package]
-name = "hyperlane-register-tests"
+name = "hyperlane-solana-sovereign-register-tests"
 version = "0.1.0"
 edition.workspace = true
 license.workspace = true
@@ -11,8 +11,12 @@ rust-version.workspace = true
 no-entrypoint = []
 
 [dev-dependencies]
-solana-sdk.workspace = true
+# our program under test
+hyperlane-solana-sovereign-register = { path = "../program" }
 borsh.workspace = true
+log.workspace = true
+tokio.workspace = true
+solana-sdk.workspace = true
 solana-program.workspace = true
 solana-program-test.workspace = true
 spl-noop = { workspace = true, features = ["no-entrypoint"] }
@@ -23,6 +27,7 @@ hyperlane-sealevel-connection-client.workspace = true
 hyperlane-sealevel-mailbox = { workspace = true, features = ["no-entrypoint"] }
 hyperlane-sealevel-igp = { workspace = true, features = ["no-entrypoint"] }
 hyperlane-test-utils = { path = "../../../hyperlane-monorepo-eiger/rust/sealevel/libraries/test-utils" }
+hyperlane-sealevel-test-ism.workspace = true
 
 [lib]
 crate-type = ["cdylib", "lib"]

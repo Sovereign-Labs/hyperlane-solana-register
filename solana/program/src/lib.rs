@@ -5,20 +5,19 @@ use hyperlane_sealevel_mailbox::{mailbox_message_dispatch_authority_pda_seeds, s
 use solana_program::account_info::{next_account_info, AccountInfo};
 use solana_program::entrypoint::ProgramResult;
 use solana_program::instruction::{AccountMeta, Instruction};
+use solana_program::msg;
 use solana_program::program::{get_return_data, invoke_signed};
 use solana_program::program_error::ProgramError;
 use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
-use solana_program::{msg, pubkey};
 
+solana_program::declare_id!("4KdqVph6eMnS2omUBLBH2u4G6wwqxG5hzesZpsFcSWod");
 solana_program::entrypoint!(process_instruction);
-
-pub const REGISTER_RECIPIENT: H256 = H256([1; 32]);
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
 pub struct RegisterMessage {
-    destination: u32,
-    embedded_user: Pubkey,
-    // TODO: recipient
+    pub destination: u32,
+    pub embedded_user: Pubkey,
+    pub recipient: H256,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -48,6 +47,13 @@ pub fn register(
     register_message: RegisterMessage,
 ) -> ProgramResult {
     let accounts_iter = &mut accounts.iter();
+
+    let mailbox_program = next_account_info(accounts_iter)?;
+
+    // we have a trusted mailbox
+    // if *mailbox_program.key != pubkey!("75HBBLae3ddeneJVrZeyrDfv6vb7SMC3aCpBucSXS5aR") {
+    //     return Err(ProgramError::InvalidArgument);
+    // }
 
     msg!("getting first account");
     // Account 2: Outbox PDA.
@@ -122,12 +128,11 @@ pub fn register(
     let dispatch_instruction = MailboxInstruction::OutboxDispatch(OutboxDispatch {
         sender: *program_id,
         destination_domain: register_message.destination,
-        recipient: REGISTER_RECIPIENT,
+        recipient: register_message.recipient,
         message_body,
     });
-    let mailbox = mailbox_program();
     let mailbox_ixn = Instruction {
-        program_id: mailbox,
+        program_id: *mailbox_program.key,
         data: dispatch_instruction.into_instruction_data()?,
         accounts,
     };
@@ -142,7 +147,7 @@ pub fn register(
     msg!("got returned data");
     // The mailbox itself doesn't make any CPIs, but as a sanity check we confirm
     // that the return data is from the mailbox.
-    if returning_program_id != mailbox {
+    if returning_program_id != *mailbox_program.key {
         return Err(ProgramError::InvalidArgument);
     }
     msg!("validated returning program id");
@@ -153,9 +158,4 @@ pub fn register(
     msg!("register {}", message_id);
 
     Ok(())
-}
-
-fn mailbox_program() -> Pubkey {
-    // testnet
-    pubkey!("75HBBLae3ddeneJVrZeyrDfv6vb7SMC3aCpBucSXS5aR")
 }
