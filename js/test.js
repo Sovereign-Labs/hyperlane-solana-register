@@ -1,5 +1,3 @@
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { SealevelCoreAdapter } from "@hyperlane-xyz/sdk";
 import {
   Connection,
   PublicKey,
@@ -14,16 +12,51 @@ import { Buffer } from "buffer";
 
 // Hyperlane Register program ID
 const REGISTER_PROGRAM_ID = new PublicKey(
-  "4KdqVph6eMnS2omUBLBH2u4G6wwqxG5hzesZpsFcSWod",
+  "4KdqVph6eMnS2omUBLBH2u4G6wwqxG5hzesZpsFcSWod"
 );
 
 // Mailbox program ID
 const MAILBOX_PROGRAM_ID = new PublicKey(
-  "75HBBLae3ddeneJVrZeyrDfv6vb7SMC3aCpBucSXS5aR",
+  "75HBBLae3ddeneJVrZeyrDfv6vb7SMC3aCpBucSXS5aR"
 );
 
 export const SEALEVEL_SPL_NOOP_ADDRESS =
   "noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV";
+
+function derivePda(seeds, programId) {
+  const [pda] = PublicKey.findProgramAddressSync(
+    seeds.map((s) => Buffer.from(s)),
+    new PublicKey(programId)
+  );
+  return pda;
+}
+
+function deriveMailboxDispatchAuthorityPda(programId) {
+  return derivePda(
+    ["hyperlane_dispatcher", "-", "dispatch_authority"],
+    programId
+  );
+}
+
+function deriveMailboxOutboxPda(mailboxProgramId) {
+  return derivePda(["hyperlane", "-", "outbox"], mailboxProgramId);
+}
+
+function deriveMailboxDispatchedMessagePda(
+  mailboxProgramId,
+  uniqueMessageAccount
+) {
+  return derivePda(
+    [
+      "hyperlane",
+      "-",
+      "dispatched_message",
+      "-",
+      new PublicKey(uniqueMessageAccount).toBuffer(),
+    ],
+    mailboxProgramId
+  );
+}
 
 // Define the RegisterMessage structure (matches your Rust struct)
 class RegisterMessage {
@@ -69,7 +102,7 @@ export async function executeRegisterProgram(
   connection,
   payer,
   destination,
-  embeddedUser,
+  embeddedUser
 ) {
   try {
     // Create the register message
@@ -81,37 +114,46 @@ export async function executeRegisterProgram(
     // Serialize the instruction data
     const instructionData = borsh.serialize(SCHEMA, instruction);
 
-    const randomWallet = Keypair.generate();
+    const uniqueMessageAccount = Keypair.generate();
     const keys = [
+      // mailbox program
       {
-        pubkey: SealevelCoreAdapter.deriveMailboxOutboxPda(MAILBOX_PROGRAM_ID),
-        isSigner: false,
-        isWritable: true,
-      },
-      {
-        pubkey:
-          SealevelCoreAdapter.deriveMailboxDispatchAuthorityPda(
-            REGISTER_PROGRAM_ID,
-          ),
+        pubkey: MAILBOX_PROGRAM_ID,
         isSigner: false,
         isWritable: false,
       },
+      // mailbox outbox pda
+      {
+        pubkey: deriveMailboxOutboxPda(MAILBOX_PROGRAM_ID),
+        isSigner: false,
+        isWritable: true,
+      },
+      // dispatch authority
+      {
+        pubkey: deriveMailboxDispatchAuthorityPda(REGISTER_PROGRAM_ID),
+        isSigner: false,
+        isWritable: false,
+      },
+      // system program
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+      // spl noop address
       {
         pubkey: new PublicKey(SEALEVEL_SPL_NOOP_ADDRESS),
         isSigner: false,
         isWritable: false,
       },
+      // payer
       { pubkey: payer.publicKey, isSigner: true, isWritable: true },
+      // unique message account
       {
-        pubkey: randomWallet.publicKey,
+        pubkey: uniqueMessageAccount.publicKey,
         isSigner: true,
-        isWritable: false,
+        isWritable: true,
       },
       {
-        pubkey: SealevelCoreAdapter.deriveMailboxDispatchedMessagePda(
+        pubkey: deriveMailboxDispatchedMessagePda(
           MAILBOX_PROGRAM_ID,
-          randomWallet.publicKey,
+          uniqueMessageAccount.publicKey
         ),
         isSigner: false,
         isWritable: true,
@@ -133,10 +175,10 @@ export async function executeRegisterProgram(
     const signature = await sendAndConfirmTransaction(
       connection,
       transaction,
-      [payer, randomWallet],
+      [payer, uniqueMessageAccount],
       {
         commitment: "confirmed",
-      },
+      }
     );
 
     console.log("Transaction confirmed!");
@@ -156,7 +198,7 @@ export async function executeRegisterProgram(
 
     // Look for the message ID in the logs
     const registerLog = txDetails?.meta?.logMessages?.find((log) =>
-      log.includes("register "),
+      log.includes("register ")
     );
 
     if (registerLog) {
@@ -187,7 +229,7 @@ const PAYER_KEYPAIR = Keypair.fromSecretKey(
     117, 217, 1, 80, 74, 103, 30, 127, 82, 51, 44, 238, 236, 201, 59, 78, 87,
     203, 109, 253, 116, 49, 9, 206, 184, 176, 44, 135, 138, 250, 209, 21, 11, 0,
     235, 242, 112, 20, 221, 216, 249, 106, 95, 30, 156, 45, 136,
-  ]),
+  ])
 );
 const destination = 1; // Destination domain
 const embeddedUser = new PublicKey("11111111111111111111111111111113"); // Example embedded user
@@ -195,13 +237,13 @@ const embeddedUser = new PublicKey("11111111111111111111111111111113"); // Examp
 async function doTransaction() {
   const connection = new Connection(
     "https://multi-wispy-sheet.solana-testnet.quiknode.pro/9bc33e3047c4a6c86c9254bead094eae0766d076",
-    "confirmed",
+    "confirmed"
   );
   executeRegisterProgram(
     connection,
     PAYER_KEYPAIR,
     destination,
-    embeddedUser.toBytes(),
+    embeddedUser.toBytes()
   );
 }
 

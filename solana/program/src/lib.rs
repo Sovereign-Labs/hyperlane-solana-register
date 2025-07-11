@@ -1,3 +1,5 @@
+use std::str::FromStr as _;
+
 use borsh::{BorshDeserialize, BorshSerialize};
 use hyperlane_core::H256;
 use hyperlane_sealevel_mailbox::instruction::{Instruction as MailboxInstruction, OutboxDispatch};
@@ -17,7 +19,7 @@ solana_program::entrypoint!(process_instruction);
 pub struct RegisterMessage {
     pub destination: u32,
     pub embedded_user: Pubkey,
-    pub recipient: H256,
+    pub recipient: String, // recipient warp route in hex or base58 encoding
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
@@ -66,6 +68,7 @@ pub fn register(
         Pubkey::find_program_address(mailbox_message_dispatch_authority_pda_seeds!(), program_id);
     msg!("finding expected dispatch auth");
     if dispatch_authority_account.key != &expected_dispatch_authority_key {
+        msg!("dispatch authority account didnt match expected");
         return Err(ProgramError::InvalidArgument);
     }
 
@@ -128,7 +131,7 @@ pub fn register(
     let dispatch_instruction = MailboxInstruction::OutboxDispatch(OutboxDispatch {
         sender: *program_id,
         destination_domain: register_message.destination,
-        recipient: register_message.recipient,
+        recipient: H256::from_str(&register_message.recipient).unwrap(),
         message_body,
     });
     let mailbox_ixn = Instruction {

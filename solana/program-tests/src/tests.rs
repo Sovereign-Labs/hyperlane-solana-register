@@ -1,5 +1,8 @@
 use borsh::BorshSerialize;
-use hyperlane_core::{accumulator::incremental::IncrementalMerkle, Encode, HyperlaneMessage, H256};
+use hyperlane_core::{
+    accumulator::incremental::IncrementalMerkle, utils::hex_or_base58_to_h256, Encode,
+    HyperlaneMessage,
+};
 use hyperlane_sealevel_mailbox::{
     accounts::{DispatchedMessage, DispatchedMessageAccount, Outbox, OutboxAccount},
     mailbox_dispatched_message_pda_seeds, mailbox_message_dispatch_authority_pda_seeds,
@@ -36,11 +39,10 @@ async fn test_register_message_dispatch() {
 
     let register_program = hyperlane_solana_sovereign_register::id();
     let embedded_user = Pubkey::new_unique();
-    let recipient = H256::random();
     let message = RegisterMessage {
         destination: REMOTE_DOMAIN,
         embedded_user,
-        recipient,
+        recipient: "0x54b0b39fd02198dfaf116360668610d2a6c28833ed646a589cc54435c80f648d".to_string(),
     };
 
     let unique_message_account_keypair = Keypair::new();
@@ -97,7 +99,10 @@ async fn test_register_message_dispatch() {
         // The sender should be the program ID because its dispatch authority signed
         sender: register_program.to_bytes().into(),
         destination: REMOTE_DOMAIN,
-        recipient,
+        recipient: hex_or_base58_to_h256(
+            "0x54b0b39fd02198dfaf116360668610d2a6c28833ed646a589cc54435c80f648d",
+        )
+        .unwrap(),
         body: expected_body,
     };
 
