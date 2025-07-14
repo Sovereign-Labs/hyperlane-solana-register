@@ -1,3 +1,5 @@
+cargo-features = ["workspace-inheritance"]
+
 [package]
 name = "hyperlane-solana-sovereign-register-tests"
 version = "0.1.0"
@@ -26,7 +28,7 @@ hyperlane-core.workspace = true
 hyperlane-sealevel-connection-client.workspace = true
 hyperlane-sealevel-mailbox = { workspace = true, features = ["no-entrypoint"] }
 hyperlane-sealevel-igp = { workspace = true, features = ["no-entrypoint"] }
-hyperlane-test-utils = { path = "../../../hyperlane-monorepo-eiger/rust/sealevel/libraries/test-utils" }
+hyperlane-test-utils = { path = "../../../hyperlane-monorepo-main/rust/sealevel/libraries/test-utils" }
 hyperlane-sealevel-test-ism.workspace = true
 
 [lib]

@@ -60,9 +60,10 @@ function deriveMailboxDispatchedMessagePda(
 
 // Define the RegisterMessage structure (matches your Rust struct)
 class RegisterMessage {
-  constructor(destination, embedded_user) {
+  constructor(destination, embedded_user, recipient) {
     this.destination = destination;
     this.embedded_user = embedded_user;
+    this.recipient = recipient;
   }
 }
 
@@ -83,6 +84,7 @@ const SCHEMA = new Map([
       fields: [
         ["destination", "u32"],
         ["embedded_user", [32]], // 32-byte array for Pubkey
+        ["recipient", "string"],
       ],
     },
   ],
@@ -102,11 +104,16 @@ export async function executeRegisterProgram(
   connection,
   payer,
   destination,
-  embeddedUser
+  embeddedUser,
+  recipient
 ) {
   try {
     // Create the register message
-    const registerMessage = new RegisterMessage(destination, embeddedUser);
+    const registerMessage = new RegisterMessage(
+      destination,
+      embeddedUser,
+      recipient
+    );
     const instruction = new HyperlaneRegisterInstruction(registerMessage);
 
     console.log("instruction", instruction);
@@ -243,7 +250,8 @@ async function doTransaction() {
     connection,
     PAYER_KEYPAIR,
     destination,
-    embeddedUser.toBytes()
+    embeddedUser.toBytes(),
+    "0xddab628a0e1371ed348dc24e9d10869a79c7df797859e7f269a3bbcb4fec98ca"
   );
 }
 
