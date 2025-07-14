@@ -17,6 +17,9 @@ sov-modules-api = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip
 sov-hyperlane-integration = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "19509c52a85b8a621b1618d848bb5c13fef51901" }
 sov-accounts = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "19509c52a85b8a621b1618d848bb5c13fef51901" }
 
+[dev-dependencies]
+sov-test-utils = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "19509c52a85b8a621b1618d848bb5c13fef51901" }
+
 [build-dependencies]
 serde = { version = "1.0.192", features = ["derive", "rc"] }
 serde_json = { version = "1.0" }

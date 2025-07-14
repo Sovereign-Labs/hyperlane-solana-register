@@ -114,3 +114,63 @@ where
 mod config {
     include!(concat!(env!("OUT_DIR"), "/config.rs"));
 }
+
+#[cfg(test)]
+mod test {
+    use std::str::FromStr;
+
+    use crate::config;
+    use crate::SolanaRegistration;
+    use borsh::BorshDeserialize;
+    use sov_modules_api::Base58Address;
+    use sov_modules_api::HexHash;
+    use sov_test_utils::TestSpec as S;
+
+    fn b58_as_hex(s: &str) -> HexHash {
+        let b58 = Base58Address::from_str(s).unwrap();
+        HexHash::try_from_slice(&b58.0).unwrap()
+    }
+
+    fn valid_program_id() -> HexHash {
+        b58_as_hex(config::SOLANA_PROGRAM_ID)
+    }
+
+    fn valid_domain() -> u32 {
+        config::HYPERLANE_SOLANA_CHAIN_ID
+    }
+
+    #[test]
+    fn test_should_handle() {
+        let m = SolanaRegistration::<S>::default();
+
+        assert!(
+            !m.should_handle(5, valid_program_id()),
+            "invalid domain should not be handled"
+        );
+        assert!(
+            !m.should_handle(
+                valid_domain(),
+                b58_as_hex("692KZJaoe2KRcD6uhCQDLLXnLNA5ZLnfvdqjE4aX9iu1")
+            ),
+            "invalid program id should not be handled"
+        );
+        assert!(
+            m.should_handle(valid_domain(), valid_program_id()),
+            "should handle correct domain & program"
+        );
+    }
+
+    #[test]
+    fn test_unpack_body() {
+        let payer = [1u8; 32];
+        let embedded = [2u8; 32];
+        let body = [payer, embedded].concat();
+        // should return the tuple (first 32 bytes, second 32 bytes)
+        let unpacked = SolanaRegistration::<S>::default()
+            .unpack_body(&body)
+            .unwrap();
+
+        assert_eq!(unpacked.0, [1u8; 32]);
+        assert_eq!(unpacked.1, [2u8; 32]);
+    }
+}

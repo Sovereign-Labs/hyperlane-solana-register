@@ -7,15 +7,18 @@ use hyperlane_sealevel_mailbox::{
     accounts::{DispatchedMessage, DispatchedMessageAccount, Outbox, OutboxAccount},
     mailbox_dispatched_message_pda_seeds, mailbox_message_dispatch_authority_pda_seeds,
 };
-use hyperlane_solana_sovereign_register::{HyperlaneRegisterInstruction, RegisterMessage};
+use hyperlane_solana_sovereign_register::{
+    HyperlaneRegisterInstruction, RegisterError, RegisterMessage,
+};
 use hyperlane_test_utils::{initialize_mailbox, mailbox_id, process_instruction};
 use solana_program_test::BanksClient;
 use solana_sdk::{
-    instruction::AccountMeta,
+    instruction::{AccountMeta, InstructionError},
     pubkey::Pubkey,
     signature::{Keypair, Signature},
     signer::Signer,
     system_program,
+    transaction::TransactionError,
 };
 
 use crate::setup::{init_env, protocol_fee_config, LOCAL_DOMAIN, MAX_PROTOCOL_FEE, REMOTE_DOMAIN};
@@ -131,6 +134,85 @@ async fn test_register_message_dispatch() {
         },
     )
     .await;
+}
+
+#[tokio::test]
+async fn test_fails_for_invalid_recipient() {
+    let mailbox_program = mailbox_id();
+    let (mut banks_client, payer) = init_env().await;
+    let protocol_fee_config = protocol_fee_config();
+
+    let mailbox_accounts = initialize_mailbox(
+        &mut banks_client,
+        &mailbox_program,
+        &payer,
+        LOCAL_DOMAIN,
+        MAX_PROTOCOL_FEE,
+        protocol_fee_config.clone(),
+    )
+    .await
+    .unwrap();
+
+    let register_program = hyperlane_solana_sovereign_register::id();
+    let embedded_user = Pubkey::new_unique();
+    let message = RegisterMessage {
+        destination: REMOTE_DOMAIN,
+        embedded_user,
+        recipient: "abc123".to_string(),
+    };
+
+    let unique_message_account_keypair = Keypair::new();
+    let (dispatch_authority_key, _expected_dispatch_authority_bump) = get_dispatch_authority();
+    let (dispatched_message_account_key, _dispatched_message_bump) = Pubkey::find_program_address(
+        mailbox_dispatched_message_pda_seeds!(&unique_message_account_keypair.pubkey()),
+        &mailbox_accounts.program,
+    );
+
+    let accounts = vec![
+        // 0. `[executable]` The Mailbox program.
+        // And now the accounts expected by the Mailbox's OutboxDispatch instruction:
+        // 1. `[writeable]` Outbox PDA.
+        // 2. `[]` This program's dispatch authority.
+        // 3. `[executable]` System program.
+        // 4. `[executable]` SPL Noop program.
+        // 5. `[signer]` Payer.
+        // 6. `[signer]` Unique message account.
+        // 7. `[writeable]` Dispatched message PDA. An empty message PDA relating to the seeds
+        //    `mailbox_dispatched_message_pda_seeds` where the message contents will be stored.
+        AccountMeta::new_readonly(mailbox_accounts.program, false),
+        AccountMeta::new(mailbox_accounts.outbox, false),
+        AccountMeta::new_readonly(dispatch_authority_key, false),
+        AccountMeta::new_readonly(system_program::id(), false),
+        AccountMeta::new_readonly(spl_noop::id(), false),
+        AccountMeta::new(payer.pubkey(), true),
+        AccountMeta::new(unique_message_account_keypair.pubkey(), true),
+        AccountMeta::new(dispatched_message_account_key, false),
+    ];
+    let instruction = solana_sdk::instruction::Instruction {
+        program_id: register_program,
+        accounts,
+        data: HyperlaneRegisterInstruction::SendRegister(message)
+            .try_to_vec()
+            .unwrap(),
+    };
+
+    let err = process_instruction(
+        &mut banks_client,
+        instruction,
+        &payer,
+        &[&payer, &unique_message_account_keypair],
+    )
+    .await
+    .unwrap_err()
+    .unwrap();
+
+    assert_eq!(
+        TransactionError::InstructionError(
+            0,
+            InstructionError::Custom(RegisterError::InvalidRecipient as u32)
+        ),
+        err
+    );
 }
 
 fn get_dispatch_authority() -> (Pubkey, u8) {
