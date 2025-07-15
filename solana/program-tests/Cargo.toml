@@ -14,7 +14,9 @@ no-entrypoint = []
 
 [dev-dependencies]
 # our program under test
-hyperlane-solana-sovereign-register = { path = "../program" }
+hyperlane-solana-sovereign-register = { path = "../program", features = [
+  "test-utils",
+] }
 borsh.workspace = true
 log.workspace = true
 tokio.workspace = true
