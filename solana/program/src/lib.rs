@@ -155,18 +155,19 @@ pub fn register(
     }
 
     let message_id = H256::try_from_slice(&returned_data).expect("Mailbox returned invalid H256");
-    msg!("message_id {}", message_id);
+    msg!("message_id {:?}", message_id);
 
     Ok(())
 }
 
 fn trusted_mailbox() -> Pubkey {
     if cfg!(feature = "test-utils") {
-        // pubkey returned by `hyperlane_test_utils::mailbox_id`
-        // the id of the mailbox in tests
+        // Solana testing mailbox
+        // https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/e0ea8910c5911b88f8de5fc4b4940f2b17f52281/rust/sealevel/libraries/test-utils/src/lib.rs#L42
         pubkey!("692KZJaoe2KRcD6uhCQDLLXnLNA5ZLnfvdqjE4aX9iu1")
     } else {
         // Solana testnet mailbox
+        // https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/e0ea8910c5911b88f8de5fc4b4940f2b17f52281/rust/sealevel/environments/testnet4/solanatestnet/core/program-ids.json#L2
         pubkey!("75HBBLae3ddeneJVrZeyrDfv6vb7SMC3aCpBucSXS5aR")
     }
 }
