@@ -2528,12 +2528,18 @@ version = "0.3.0"
 dependencies = [
  "anyhow",
  "borsh",
+ "bs58",
+ "schemars 0.8.22",
  "serde",
  "serde_json",
  "sov-accounts",
  "sov-hyperlane-integration",
+ "sov-mock-zkvm",
  "sov-modules-api",
+ "sov-rollup-interface",
+ "sov-state",
  "sov-test-utils",
+ "strum 0.26.3",
 ]
 
 [[package]]

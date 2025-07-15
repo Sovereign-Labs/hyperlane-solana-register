@@ -1,10 +1,10 @@
 {
   "mainnet": {
     "chainId": 1399811149,
-    "programId": "E588QtVUvresuXq2KoNEwAmoifCzYGpRBdHByN9KQMbi"
+    "programId": "4KdqVph6eMnS2omUBLBH2u4G6wwqxG5hzesZpsFcSWod"
   },
   "testnet": {
     "chainId": 1399811150,
-    "programId": "75HBBLae3ddeneJVrZeyrDfv6vb7SMC3aCpBucSXS5aR"
+    "programId": "4KdqVph6eMnS2omUBLBH2u4G6wwqxG5hzesZpsFcSWod"
   }
 }

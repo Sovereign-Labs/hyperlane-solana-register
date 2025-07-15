@@ -111,7 +111,7 @@ where
     }
 }
 
-mod config {
+pub mod config {
     include!(concat!(env!("OUT_DIR"), "/config.rs"));
 }
 

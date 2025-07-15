@@ -1,32 +1,45 @@
-use std::collections::HashMap;
+use std::str::FromStr;
 use std::sync::Arc;
 
-// use sov_bank::Amount;
-use sov_hyperlane_integration::igp::ExchangeRateAndGasPrice;
+use hyperlane_register_module::{config, SolanaRegistration};
 use sov_hyperlane_integration::warp::{Admin, TokenKind};
 use sov_hyperlane_integration::{
-    HyperlaneAddress, InterchainGasPaymaster, InterchainGasPaymasterCallMessage, Ism,
-    Mailbox as RawMailbox, MerkleTreeHook, Warp, WarpCallMessage, WarpEvent,
+    HyperlaneAddress, InterchainGasPaymaster, Ism, Mailbox as RawMailbox, MerkleTreeHook, Message,
+    Warp, WarpCallMessage, WarpEvent,
 };
-use sov_modules_api::{HexHash, HexString, SafeVec, Spec};
+use sov_modules_api::execution_mode::Native;
+use sov_modules_api::macros::config_value;
+use sov_modules_api::{Base58Address, HexHash, HexString, SafeVec};
 use sov_test_utils::runtime::genesis::zk::config::HighLevelZkGenesisConfig;
 use sov_test_utils::runtime::TestRunner;
-use sov_test_utils::{generate_runtime, AsUser, TestSpec, TestUser, TransactionTestCase};
+use sov_test_utils::{
+    generate_runtime, AsUser, MockDaSpec, MockZkvm, TestUser, TransactionTestCase,
+};
 
-pub type Mailbox<S> = RawMailbox<S, Warp<S>>;
-pub type S = TestSpec;
+use crate::spec::SolanaSpec;
+
+pub type Mailbox<S> = RawMailbox<S, SolanaRegistration<S>>;
+pub type S = SolanaSpec<MockDaSpec, MockZkvm, MockZkvm, Native>;
 pub type RT = TestRuntime<S>;
 type WarpRouteId = HexHash;
 
 generate_runtime! {
     name: TestRuntime,
-    modules: [mailbox: Mailbox<S>, warp: Warp<S>, merkle_tree_hooks: MerkleTreeHook<S>, interchain_gas_paymaster: InterchainGasPaymaster<S>],
+    modules: [mailbox: Mailbox<S>, warp: Warp<S>, merkle_tree_hooks: MerkleTreeHook<S>, interchain_gas_paymaster: InterchainGasPaymaster<S>, solana_register: SolanaRegistration<S>],
     operating_mode: sov_modules_api::runtime::OperatingMode::Zk,
     minimal_genesis_config_type: sov_test_utils::runtime::genesis::zk::config::MinimalZkGenesisConfig<S>,
     runtime_trait_impl_bounds: [S::Address: HyperlaneAddress],
     kernel_type: sov_test_utils::runtime::BasicKernel<'a, S>,
     auth_type: sov_modules_api::capabilities::RollupAuthenticator<S, TestRuntime<S>>,
     auth_call_wrapper: |call| call,
+}
+
+pub fn generate_with_additional_accounts(num_accounts: usize) -> HighLevelZkGenesisConfig<S> {
+    HighLevelZkGenesisConfig::generate_with_additional_accounts_and_code_commitments(
+        num_accounts,
+        Default::default(),
+        Default::default(),
+    )
 }
 
 #[allow(clippy::type_complexity)]
@@ -36,13 +49,14 @@ pub fn setup() -> (
     TestUser<S>,
     TestUser<S>,
 ) {
-    let genesis_config = HighLevelZkGenesisConfig::generate_with_additional_accounts(3);
+    let genesis_config = generate_with_additional_accounts(3);
 
     let admin_account = genesis_config.additional_accounts()[0].clone();
     let extra_account = genesis_config.additional_accounts()[1].clone();
     let relayer_account = genesis_config.additional_accounts()[1].clone();
 
-    let genesis = GenesisConfig::from_minimal_config(genesis_config.clone().into(), (), (), (), ());
+    let genesis =
+        GenesisConfig::from_minimal_config(genesis_config.clone().into(), (), (), (), (), ());
 
     (
         TestRunner::new_with_genesis(genesis.into_genesis_params(), Default::default()),
@@ -91,4 +105,51 @@ pub fn register_warp_route_with_ism_and_token_source(
     let id = *warp_route_id.lock().unwrap();
     assert!(id != HexString([0; 32]), "Warp route was not registered");
     id
+}
+
+pub fn make_message(
+    nonce: u32,
+    origin: u32,
+    sender: HexHash,
+    destination: u32,
+    recipient: HexHash,
+    body: HexString,
+) -> Message {
+    Message {
+        version: 3,
+        nonce,
+        origin_domain: origin,
+        sender,
+        dest_domain: destination,
+        recipient,
+        body,
+    }
+}
+
+pub fn make_invalid_message(nonce: u32, recipient: HexHash, body: HexString) -> Message {
+    let program_b58 = Base58Address::from_str(config::SOLANA_PROGRAM_ID).unwrap();
+    let program_id = HexHash::new(program_b58.0);
+
+    make_message(
+        nonce,
+        0, // wrong origin domain
+        program_id,
+        config_value!("HYPERLANE_BRIDGE_DOMAIN"),
+        recipient,
+        body,
+    )
+}
+
+pub fn make_valid_message(nonce: u32, recipient: HexHash, body: HexString) -> Message {
+    let program_b58 = Base58Address::from_str(config::SOLANA_PROGRAM_ID).unwrap();
+    let program_id = HexHash::new(program_b58.0);
+
+    make_message(
+        nonce,
+        config::HYPERLANE_SOLANA_CHAIN_ID,
+        program_id,
+        config_value!("HYPERLANE_BRIDGE_DOMAIN"),
+        recipient,
+        body,
+    )
 }
