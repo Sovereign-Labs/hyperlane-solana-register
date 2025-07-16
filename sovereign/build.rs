@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
-const DEFAULT_NETWORK: &str = "mainnet";
+const DEFAULT_NETWORK: &str = "testnet";
 
 fn main() {
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -13,15 +13,14 @@ fn main() {
     let json: Value = serde_json::from_str(&json_str).unwrap();
 
     let network = std::env::var("SOV_HYPERLANE_SOLANA_NETWORK").unwrap_or_else(|_| {
-        println!("cargo:warning=SOV_HYPERLANE_SOLANA_NETWORK env var not set, defaulting to solana mainnet");
+        println!("cargo:warning=SOV_HYPERLANE_SOLANA_NETWORK env var not set, defaulting to solana {DEFAULT_NETWORK}");
         DEFAULT_NETWORK.to_string()
     });
     let network = match network.as_str() {
         "mainnet" | "testnet" => network,
         _ => {
             println!(
-                "cargo:warning=SOV_HYPERLANE_SOLANA_NETWORK set to invalid value {}, using '{}' (valid values: 'mainnet', 'testnet')",
-                network, DEFAULT_NETWORK
+                "cargo:warning=SOV_HYPERLANE_SOLANA_NETWORK set to invalid value {network}, using '{DEFAULT_NETWORK}' (valid values: 'mainnet', 'testnet')",
             );
             DEFAULT_NETWORK.to_string()
         }
@@ -37,14 +36,12 @@ fn main() {
 
     writeln!(
         &mut f,
-        "pub const HYPERLANE_SOLANA_CHAIN_ID: u32 = {};",
-        chain_id
+        "pub const HYPERLANE_SOLANA_CHAIN_ID: u32 = {chain_id};",
     )
     .unwrap();
     writeln!(
         &mut f,
-        "pub const SOLANA_PROGRAM_ID: &str = \"{}\";",
-        program_id
+        "pub const SOLANA_PROGRAM_ID: &str = \"{program_id}\";",
     )
     .unwrap();
 }
