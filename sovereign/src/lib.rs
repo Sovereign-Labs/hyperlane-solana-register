@@ -1,8 +1,8 @@
 use std::str::FromStr as _;
 
 use sov_modules_api::{
-    Base58Address, Context, CredentialId, Error as ModuleError, HexHash, HexString, Module,
-    ModuleId, ModuleInfo, ModuleRestApi, Spec, TxState,
+    Base58Address, Context, CredentialId, HexHash, HexString, Module, ModuleId, ModuleInfo,
+    ModuleRestApi, Spec, TxState,
 };
 
 use sov_hyperlane_integration::{HyperlaneAddress, Ism, Recipient, Warp};
@@ -78,8 +78,8 @@ where
         _message: Self::CallMessage,
         _context: &Context<Self::Spec>,
         _state: &mut impl TxState<Self::Spec>,
-    ) -> Result<(), ModuleError> {
-        Err(anyhow::anyhow!("Module doesn't support calls").into())
+    ) -> Result<(), anyhow::Error> {
+        anyhow::bail!("Module doesn't support calls")
     }
 }
 
