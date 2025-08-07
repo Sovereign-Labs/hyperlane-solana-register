@@ -2,6 +2,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use hyperlane_register_module::{config, SolanaRegistration};
+use sov_bank::Amount;
 use sov_hyperlane_integration::warp::{Admin, TokenKind};
 use sov_hyperlane_integration::{
     HyperlaneAddress, InterchainGasPaymaster, Ism, Mailbox as RawMailbox, MerkleTreeHook, Message,
@@ -89,6 +90,10 @@ pub fn register_warp_route_with_ism_and_token_source(
             token_source,
             ism,
             remote_routers: SafeVec::new(),
+            inbound_transferrable_tokens_limit: Amount::MAX,
+            inbound_limit_replenishment_per_slot: Amount::MAX,
+            outbound_transferrable_tokens_limit: Amount::MAX,
+            outbound_limit_replenishment_per_slot: Amount::MAX,
         }),
         assert: Box::new(move |result, _| {
             assert!(
