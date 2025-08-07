@@ -13,15 +13,16 @@ borsh = { version = "1", features = ["rc"] }
 serde = { version = "1.0.192", features = ["derive", "rc"] }
 serde_json = { version = "1.0" }
 
-sov-modules-api = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "c0f05aa3a03320ac0c541db6686bb601d9eaeb23" }
-sov-hyperlane-integration = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "c0f05aa3a03320ac0c541db6686bb601d9eaeb23" }
-sov-accounts = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "c0f05aa3a03320ac0c541db6686bb601d9eaeb23" }
+sov-modules-api = { git = "https://@github.com/Sovereign-Labs/sovereign-sdk.git", rev = "f3ca8bb8938d601e3e5d40b5404e951da7b86608" }
+sov-hyperlane-integration = { git = "https://@github.com/Sovereign-Labs/sovereign-sdk.git", rev = "f3ca8bb8938d601e3e5d40b5404e951da7b86608" }
+sov-accounts = { git = "https://@github.com/Sovereign-Labs/sovereign-sdk.git", rev = "f3ca8bb8938d601e3e5d40b5404e951da7b86608" }
 
 [dev-dependencies]
-sov-test-utils = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "c0f05aa3a03320ac0c541db6686bb601d9eaeb23" }
-sov-rollup-interface = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "c0f05aa3a03320ac0c541db6686bb601d9eaeb23" }
-sov-state = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "c0f05aa3a03320ac0c541db6686bb601d9eaeb23" }
-sov-mock-zkvm = { git = "ssh://git@github.com/Sovereign-Labs/sovereign-sdk-wip.git", rev = "c0f05aa3a03320ac0c541db6686bb601d9eaeb23" }
+sov-test-utils = { git = "https://@github.com/Sovereign-Labs/sovereign-sdk.git", rev = "f3ca8bb8938d601e3e5d40b5404e951da7b86608" }
+sov-bank = { git = "https://@github.com/Sovereign-Labs/sovereign-sdk.git", rev = "f3ca8bb8938d601e3e5d40b5404e951da7b86608" }
+sov-rollup-interface = { git = "https://@github.com/Sovereign-Labs/sovereign-sdk.git", rev = "f3ca8bb8938d601e3e5d40b5404e951da7b86608" }
+sov-state = { git = "https://@github.com/Sovereign-Labs/sovereign-sdk.git", rev = "f3ca8bb8938d601e3e5d40b5404e951da7b86608" }
+sov-mock-zkvm = { git = "https://@github.com/Sovereign-Labs/sovereign-sdk.git", rev = "f3ca8bb8938d601e3e5d40b5404e951da7b86608" }
 schemars = { version = "0.8.21", features = ["derive"] }
 strum = { version = "0.26.3", features = ["derive"] }
 bs58 = { version = "0.5.1", default-features = false, features = [
