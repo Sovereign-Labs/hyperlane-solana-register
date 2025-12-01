@@ -17,16 +17,16 @@ solana-program = "=1.14.13"
 solana-program-test = "=1.14.13"
 solana-client = "=1.14.13"
 spl-noop = { version = "=0.1.3", features = ["no-entrypoint"] }
-hyperlane-sealevel-mailbox = { path = "../../hyperlane-monorepo-main/rust/sealevel/programs/mailbox", features = [
+hyperlane-sealevel-mailbox = { git = "https://github.com/Sovereign-Labs/hyperlane-monorepo.git", branch = "integration", features = [
   "no-entrypoint",
 ] }
-hyperlane-sealevel-igp = { path = "../../hyperlane-monorepo-main/rust/sealevel/programs/hyperlane-sealevel-igp", features = [
+hyperlane-sealevel-igp = { git = "https://github.com/Sovereign-Labs/hyperlane-monorepo.git", branch = "integration", features = [
   "no-entrypoint",
 ] }
-account-utils = { path = "../../hyperlane-monorepo-main/rust/sealevel/libraries/account-utils" }
-hyperlane-core = { path = "../../hyperlane-monorepo-main/rust/main/hyperlane-core" }
-hyperlane-sealevel-connection-client = { path = "../../hyperlane-monorepo-main/rust/sealevel/libraries/hyperlane-sealevel-connection-client" }
-hyperlane-sealevel-test-ism = { path = "../../hyperlane-monorepo-main/rust/sealevel/programs/ism/test-ism" }
+account-utils = { git = "https://github.com/Sovereign-Labs/hyperlane-monorepo.git", branch = "integration" }
+hyperlane-core = { git = "https://github.com/Sovereign-Labs/hyperlane-monorepo.git", branch = "integration" }
+hyperlane-sealevel-connection-client = { git = "https://github.com/Sovereign-Labs/hyperlane-monorepo.git", branch = "integration" }
+hyperlane-sealevel-test-ism = { git = "https://github.com/Sovereign-Labs/hyperlane-monorepo.git", branch = "integration" }
 
 tokio = { version = "1.37", features = ["parking_lot", "tracing"] }
 
