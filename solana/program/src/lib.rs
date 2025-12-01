@@ -12,7 +12,7 @@ use solana_program::program_error::ProgramError;
 use solana_program::pubkey::{Pubkey, PUBKEY_BYTES};
 use solana_program::{msg, pubkey};
 
-solana_program::declare_id!("4KdqVph6eMnS2omUBLBH2u4G6wwqxG5hzesZpsFcSWod");
+solana_program::declare_id!("HX6EowhA5XwWj29iTFeqhprg1gUxHgv6RNUu4bRtUgob");
 solana_program::entrypoint!(process_instruction);
 
 pub enum RegisterError {
