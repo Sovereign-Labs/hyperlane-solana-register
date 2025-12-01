@@ -1,7 +1,7 @@
 use borsh::BorshSerialize;
 use hyperlane_core::{
-    accumulator::incremental::IncrementalMerkle, utils::hex_or_base58_to_h256, Encode,
-    HyperlaneMessage,
+    accumulator::incremental::IncrementalMerkle, utils::hex_or_base58_or_bech32_to_h256, Encode,
+    HyperlaneMessage
 };
 use hyperlane_sealevel_mailbox::{
     accounts::{DispatchedMessage, DispatchedMessageAccount, Outbox, OutboxAccount},
@@ -102,7 +102,7 @@ async fn test_register_message_dispatch() {
         // The sender should be the program ID because its dispatch authority signed
         sender: register_program.to_bytes().into(),
         destination: REMOTE_DOMAIN,
-        recipient: hex_or_base58_to_h256(
+        recipient: hex_or_base58_or_bech32_to_h256(
             "0x54b0b39fd02198dfaf116360668610d2a6c28833ed646a589cc54435c80f648d",
         )
         .unwrap(),

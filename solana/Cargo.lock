@@ -15,6 +15,7 @@ dependencies = [
 [[package]]
 name = "access-control"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "solana-program",
 ]
@@ -22,6 +23,7 @@ dependencies = [
 [[package]]
 name = "account-utils"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "borsh",
  "solana-program",
@@ -323,6 +325,12 @@ name = "base64ct"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
+
+[[package]]
+name = "bech32"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d965446196e3b7decd44aa7ee49e31d630118f90ef12f97900f262eb915c951d"
 
 [[package]]
 name = "bigdecimal"
@@ -1621,7 +1629,8 @@ dependencies = [
 
 [[package]]
 name = "hyperlane-application"
-version = "0.1.0"
+version = "1.7.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "serde",
  "serde_json",
@@ -1630,11 +1639,13 @@ dependencies = [
 
 [[package]]
 name = "hyperlane-core"
-version = "0.1.0"
+version = "1.7.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "async-rwlock",
  "async-trait",
  "auto_impl",
+ "bech32",
  "bigdecimal",
  "borsh",
  "bs58 0.5.1",
@@ -1667,6 +1678,7 @@ dependencies = [
 [[package]]
 name = "hyperlane-sealevel-connection-client"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "access-control",
  "borsh",
@@ -1679,6 +1691,7 @@ dependencies = [
 [[package]]
 name = "hyperlane-sealevel-igp"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "access-control",
  "account-utils",
@@ -1695,6 +1708,7 @@ dependencies = [
 [[package]]
 name = "hyperlane-sealevel-interchain-security-module-interface"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "borsh",
  "solana-program",
@@ -1704,6 +1718,7 @@ dependencies = [
 [[package]]
 name = "hyperlane-sealevel-mailbox"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "access-control",
  "account-utils",
@@ -1725,6 +1740,7 @@ dependencies = [
 [[package]]
 name = "hyperlane-sealevel-message-recipient-interface"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "borsh",
  "getrandom 0.2.15",
@@ -1736,6 +1752,7 @@ dependencies = [
 [[package]]
 name = "hyperlane-sealevel-test-ism"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "account-utils",
  "borsh",
@@ -1788,6 +1805,7 @@ dependencies = [
 [[package]]
 name = "hyperlane-test-transaction-utils"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "solana-program",
  "solana-program-test",
@@ -1797,6 +1815,7 @@ dependencies = [
 [[package]]
 name = "hyperlane-test-utils"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "borsh",
  "hyperlane-core",
@@ -3375,6 +3394,7 @@ dependencies = [
 [[package]]
 name = "serializable-account-meta"
 version = "0.1.0"
+source = "git+https://github.com/Sovereign-Labs/hyperlane-monorepo.git?branch=integration#6d70cc20add75fd14cc6035fd327cb7c3913664a"
 dependencies = [
  "borsh",
  "solana-program",
