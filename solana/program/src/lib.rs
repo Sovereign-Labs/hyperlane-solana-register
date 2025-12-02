@@ -15,6 +15,18 @@ use solana_program::{msg, pubkey};
 solana_program::declare_id!("HX6EowhA5XwWj29iTFeqhprg1gUxHgv6RNUu4bRtUgob");
 solana_program::entrypoint!(process_instruction);
 
+#[cfg(feature = "debug-logs")]
+macro_rules! debug_msg {
+    ($($arg:tt)*) => {
+        solana_program::msg!("[dbg] {}", format!($($arg)*))
+    };
+}
+
+#[cfg(not(feature = "debug-logs"))]
+macro_rules! debug_msg {
+    ($($arg:tt)*) => {};
+}
+
 pub enum RegisterError {
     InvalidMailbox,
     InvalidRecipient,
@@ -60,10 +72,17 @@ pub fn register(
     accounts: &[AccountInfo],
     register_message: RegisterMessage,
 ) -> ProgramResult {
+    debug_msg!("Executing register instruction");
+
     let accounts_iter = &mut accounts.iter();
     let mailbox_program = next_account_info(accounts_iter)?;
 
     if *mailbox_program.key != trusted_mailbox() {
+        debug_msg!(
+            "Invalid mailbox program: {}, expected: {}",
+            mailbox_program.key,
+            trusted_mailbox()
+        );
         return Err(RegisterError::InvalidMailbox.into());
     }
 
@@ -71,24 +90,43 @@ pub fn register(
     let mailbox_outbox_account = next_account_info(accounts_iter)?;
     // Account 3: Dispatch authority.
     let dispatch_authority_account = next_account_info(accounts_iter)?;
+
+    debug_msg!("Fetching dispatch authority");
     let (expected_dispatch_authority_key, expected_dispatch_authority_bump) =
         Pubkey::find_program_address(mailbox_message_dispatch_authority_pda_seeds!(), program_id);
 
     if dispatch_authority_account.key != &expected_dispatch_authority_key {
+        debug_msg!(
+            "Invalid dispatch authority: {}, expected: {}",
+            dispatch_authority_account.key,
+            expected_dispatch_authority_key
+        );
         return Err(ProgramError::InvalidArgument);
     }
 
     // Account 4: System program.
     let system_program_account = next_account_info(accounts_iter)?;
 
+    debug_msg!("Verifying system program");
     if system_program_account.key != &solana_program::system_program::id() {
+        debug_msg!(
+            "Invalid system program: {}, expected: {}",
+            system_program_account.key,
+            solana_program::system_program::id()
+        );
         return Err(ProgramError::InvalidArgument);
     }
 
     // Account 5: SPL Noop program.
     let spl_noop = next_account_info(accounts_iter)?;
 
+    debug_msg!("Verifying SPL Noop program");
     if spl_noop.key != &spl_noop::id() {
+        debug_msg!(
+            "Invalid SPL Noop program: {}, expected: {}",
+            spl_noop.key,
+            spl_noop::id()
+        );
         return Err(ProgramError::InvalidArgument);
     }
 
@@ -130,6 +168,11 @@ pub fn register(
     let recipient =
         H256::from_str(&register_message.recipient).map_err(|_| RegisterError::InvalidRecipient)?;
 
+    debug_msg!(
+        "Dispatching register message to domain {} for recipient {:?}",
+        register_message.destination,
+        recipient
+    );
     let dispatch_instruction = MailboxInstruction::OutboxDispatch(OutboxDispatch {
         sender: *program_id,
         destination_domain: register_message.destination,
@@ -141,8 +184,11 @@ pub fn register(
         data: dispatch_instruction.into_instruction_data()?,
         accounts,
     };
+
+    debug_msg!("Invoking mailbox dispatch instruction");
     // Call the Mailbox program to dispatch the message.
     invoke_signed(&mailbox_ixn, account_infos, &[dispatch_authority_seeds])?;
+    debug_msg!("Mailbox dispatch instruction invoked");
 
     // Parse the message ID from the return data from the prior dispatch.
     let (returning_program_id, returned_data) =

@@ -9,9 +9,11 @@ authors.workspace = true
 publish = false
 
 [features]
+default = ["debug-logs"]
 no-entrypoint = []
 test-client = ["dep:solana-sdk", "dep:spl-noop"]
 test-utils = []
+debug-logs = []
 
 [dependencies]
 solana-sdk = { workspace = true, optional = true }
