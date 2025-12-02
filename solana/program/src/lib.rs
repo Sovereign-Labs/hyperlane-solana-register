@@ -207,7 +207,11 @@ pub fn register(
 }
 
 fn trusted_mailbox() -> Pubkey {
-    if cfg!(feature = "test-utils") {
+    // First check for compile-time env var
+    if let Some(mailbox_pubkey_str) = option_env!("HYPERLANE_MAILBOX_PUBKEY") {
+        Pubkey::from_str(mailbox_pubkey_str)
+            .expect("Invalid HYPERLANE_MAILBOX_PUBKEY environment variable")
+    } else if cfg!(feature = "test-utils") {
         // Solana testing mailbox
         // https://github.com/hyperlane-xyz/hyperlane-monorepo/blob/e0ea8910c5911b88f8de5fc4b4940f2b17f52281/rust/sealevel/libraries/test-utils/src/lib.rs#L42
         pubkey!("692KZJaoe2KRcD6uhCQDLLXnLNA5ZLnfvdqjE4aX9iu1")
