@@ -58,8 +58,10 @@ pub fn process_instruction(
     accounts: &[AccountInfo],
     instruction_data: &[u8],
 ) -> ProgramResult {
+    debug_msg!("Processing instruction..");
     let instruction = HyperlaneRegisterInstruction::try_from_slice(instruction_data)
         .map_err(|_| ProgramError::InvalidInstructionData)?;
+    debug_msg!("Decoded instruction: {:?}", instruction);
     match instruction {
         HyperlaneRegisterInstruction::SendRegister(register_message) => {
             register(program_id, accounts, register_message)
